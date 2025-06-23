@@ -1,50 +1,99 @@
-# Welcome to your Expo app 👋
+# 🚀 Welcome to the Expo React Native Project
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is an [Expo](https://expo.dev) project created using [`create-expo-app`](https://www.npmjs.com/package/create-expo-app). It uses **file-based routing** via [`expo-router`](https://expo.github.io/router/docs).
 
-## Get started
+---
 
-1. Install dependencies
+## 🛠️ Project Setup for Collaborators
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### 1. Clone the Repository
 
 ```bash
-npm run reset-project
+git clone https://github.com/blckzr/SmartShield.git
+cd SmartShield
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+> 📁 Make sure you're inside the project root directory before continuing.
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+### 2. Install Dependencies
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Run this after cloning the project or pulling changes that update dependencies:
 
-## Join the community
+```bash
+npm install
+```
 
-Join our community of developers creating universal apps.
+If you're using Yarn:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+yarn install
+```
+
+---
+
+### 3. Start the App
+
+```bash
+npx expo start
+```
+
+This will launch the Expo Developer Tools in your browser. From there, you can:
+
+- Run the app in **Expo Go** (scan the QR code)
+- Open it in an **Android emulator**
+- Launch it in an **iOS simulator** (macOS only)
+- Open the project in a **web browser**
+
+---
+
+## 📂 Project Structure
+
+- `app/` – All screen files and routes (uses file-based routing)
+- `components/` – Shared and reusable UI components
+- `assets/` – Images, icons, fonts, etc.
+- `package.json` – Project dependencies and scripts
+
+---
+
+This moves the current `app/` directory to `app-example/` and creates a blank `app/` folder.
+
+---
+
+## 📦 Adding New Packages
+
+If you install new packages, make sure to:
+
+1. Commit both `package.json` and `package-lock.json`
+2. Inform your team to run `npm install` after pulling
+
+---
+
+## 🔐 Environment Variables
+
+If you're using a `.env` file:
+
+- **Do NOT commit it to Git**
+- Share it securely with teammates
+- Provide a `.env.example` with required variables
+
+---
+
+## 📚 Learn More
+
+- [Expo Documentation](https://docs.expo.dev/)
+- [expo-router Docs](https://expo.github.io/router/docs)
+- [React Native Docs](https://reactnative.dev/)
+- [Learn Expo Tutorial](https://docs.expo.dev/tutorial/introduction/)
+
+---
+
+## 🤝 Join the Community
+
+- [Expo on GitHub](https://github.com/expo/expo)
+- [Expo Discord](https://chat.expo.dev)
+
+---
+
+> ✅ This project is ready for collaboration. Happy coding!
