@@ -59,11 +59,11 @@ export default function App() {
               description: "Extreme Danger",
             },
           ].map((item, index) => (
-            <View
-              key={index}
-              style={[styles.chartItem, { backgroundColor: item.color }]}
-            >
-              <Text style={styles.chartLabel}>{item.label}</Text>
+            <View key={index} style={styles.chartItemContainer}>
+              <View style={[styles.chartItem, { backgroundColor: item.color }]}>
+                <Text style={styles.chartLabel}>{item.label}</Text>
+              </View>
+              <Text style={styles.chartDescription}>{item.description}</Text>
             </View>
           ))}
         </View>
@@ -132,23 +132,29 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "center",
   },
+  chartItemContainer: {
+    alignItems: "center",
+    marginHorizontal: 6,
+    marginBottom: 10,
+    width: 100,
+  },
   chartItem: {
-    paddingHorizontal: 10,
     paddingVertical: 6,
-    margin: 5,
+    paddingHorizontal: 10,
     borderRadius: 8,
     alignItems: "center",
-    width: 100,
+    justifyContent: "center",
+    width: "100%",
   },
   chartLabel: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "bold",
+    color: "#000",
   },
   chartDescription: {
     fontSize: 11,
-    fontWeight: "500",
     color: "#333",
     textAlign: "center",
-    marginTop: 2,
+    marginTop: 4,
   },
 });
