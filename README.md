@@ -17,7 +17,17 @@ cd SmartShield
 
 ---
 
-### 2. Install Dependencies
+### 2. Install Node JS
+
+```bash
+https://nodejs.org/en
+```
+
+- Visit the website and install the appropriate version for your device.
+- Install the Node JS by opening the wizard.
+- Install all default settings.
+
+### 3. Install Dependencies
 
 Run this after cloning the project or pulling changes that update dependencies:
 
@@ -33,10 +43,10 @@ yarn install
 
 ---
 
-### 3. Start the App
+### 4. Start the App
 
 ```bash
-npx expo start
+npm start
 ```
 
 This will launch the Expo Developer Tools in your browser. From there, you can:
@@ -95,5 +105,3 @@ If you're using a `.env` file:
 - [Expo Discord](https://chat.expo.dev)
 
 ---
-
-> ✅ This project is ready for collaboration. Happy coding!
