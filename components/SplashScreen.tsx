@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 export default function SplashScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>SmartShield</Text>
+      <Text style={styles.title}>🛡️SmartShield🛡️</Text>
       <Text style={styles.sub}>Loading...</Text>
     </View>
   );

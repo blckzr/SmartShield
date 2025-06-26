@@ -41,7 +41,7 @@ export default function RootLayout() {
       <Tabs.Screen
         name="shelterFinder"
         options={{
-          title: "Shelter Finder",
+          title: "NEAREST COOLING SHELTER",
           tabBarIcon: ({ color }) => (
             <Fontisto name="map" size={24} color={color} />
           ),
