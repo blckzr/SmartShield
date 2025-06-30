@@ -1,35 +1,61 @@
+import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { getHeatIndexLevel } from "../../utils/heatIndex";
 
 export default function App() {
-  // State
   const [temperature, setTemperature] = useState<number>(0);
-  const [location, setLocation] = useState<string>("STA. MESA, MANILA");
+  const [locationName, setLocationName] = useState<string>(
+    "Loading location..."
+  );
+  const [coords, setCoords] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [heatLevel, setHeatLevel] = useState<{
     level: string;
     color: string;
   } | null>(null);
 
   useEffect(() => {
-    // TODO: Replace the mock data when backend is implemented
-    const mockTemp = 52; // mock temperature value
-    const mockLoc = "STA. MESA, MANILA"; // mock location name
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setLocationName("Permission denied");
+        return;
+      }
 
-    setTemperature(mockTemp);
-    setLocation(mockLoc);
-    setHeatLevel(getHeatIndexLevel(mockTemp));
+      const location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+      setCoords({ latitude, longitude });
+
+      const [place] = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude,
+      });
+
+      if (place.city || place.region) {
+        setLocationName(
+          `${place.city ?? ""}${place.region ? ", " + place.region : ""}`
+        );
+      } else {
+        setLocationName("Unknown Location");
+      }
+
+      const mockTemp = 52; // mock data for now
+      setTemperature(mockTemp);
+      setHeatLevel(getHeatIndexLevel(mockTemp));
+    })();
   }, []);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>{location}</Text>
+      <Text style={styles.header}>{locationName}</Text>
       <Text style={styles.date}>Fri, July 4, 2025</Text>
 
       <View
         style={[styles.temperatureCard, { backgroundColor: heatLevel?.color }]}
       >
-        {/* Replace with local image or emoji as needed */}
         <Text style={styles.emoji}>🌡️☀️</Text>
         <Text style={styles.temperature}>{temperature}°C</Text>
       </View>
