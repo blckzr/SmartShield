@@ -42,6 +42,7 @@ export default function App() {
         setLocationName("Unknown Location");
       }
 
+      // Integrate the backend here for getting the heat index
       const mockTemp = 52; // mock data for now
       setTemperature(mockTemp);
       setHeatLevel(getHeatIndexLevel(mockTemp));
