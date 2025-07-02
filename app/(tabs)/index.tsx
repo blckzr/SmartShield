@@ -1,14 +1,12 @@
 import axios from "axios";
-import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { getLocationName, getUserLocation } from "../../utils/getUserLocation";
 import { getHeatIndexLevel } from "../../utils/heatIndex";
 
 export default function App() {
   const [temperature, setTemperature] = useState<number>(0);
-  const [locationName, setLocationName] = useState<string>(
-    "Loading location..."
-  );
+  const [locationName, setLocationName] = useState("Loading location...");
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
@@ -19,49 +17,33 @@ export default function App() {
   } | null>(null);
 
   useEffect(() => {
-  (async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      setLocationName("Permission denied");
-      return;
-    }
+    (async () => {
+      try {
+        const { latitude, longitude } = await getUserLocation();
+        setCoords({ latitude, longitude });
 
-    const location = await Location.getCurrentPositionAsync({});
-    const { latitude, longitude } = location.coords;
-    setCoords({ latitude, longitude });
+        const resolvedName = await getLocationName(latitude, longitude);
+        setLocationName(resolvedName);
 
-    const [place] = await Location.reverseGeocodeAsync({
-      latitude,
-      longitude,
-    });
+        const response = await axios.post(
+          "http://192.168.1.12:8000/process_userlocation",
+          {
+            latitude,
+            longitude,
+          }
+        );
 
-    if (place.city || place.region) {
-      setLocationName(
-        `${place.city ?? ""}${place.region ? ", " + place.region : ""}`
-      );
-    } else {
-      setLocationName("Unknown Location");
-    }
+        const data = response.data;
+        setTemperature(data.heat_index);
+        setHeatLevel(getHeatIndexLevel(data.heat_index));
 
-    try {
-      const response = await axios.post(
-        "http://192.168.1.12:8000/process_userlocation",
-        {
-          latitude: latitude,
-          longitude: longitude
-        }
-      );
-
-      const data = response.data;
-      setTemperature(data.heat_index);
-      setHeatLevel((getHeatIndexLevel(data.heat_index)));
-      console.log("Suggested shelters:", data.suggested_shelters);
-
-    } catch (error) {
-      console.error("Error fetching heat index:", error);
-    }
-  })();
-}, []);
+        console.log("Suggested shelters:", data.suggested_shelters);
+      } catch (error) {
+        console.error("Error fetching heat index or location:", error);
+        setLocationName("Location error");
+      }
+    })();
+  }, []);
 
   return (
     <View style={styles.container}>
