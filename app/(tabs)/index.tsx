@@ -1,3 +1,4 @@
+import axios from "axios";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -18,36 +19,49 @@ export default function App() {
   } | null>(null);
 
   useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setLocationName("Permission denied");
-        return;
-      }
+  (async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setLocationName("Permission denied");
+      return;
+    }
 
-      const location = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = location.coords;
-      setCoords({ latitude, longitude });
+    const location = await Location.getCurrentPositionAsync({});
+    const { latitude, longitude } = location.coords;
+    setCoords({ latitude, longitude });
 
-      const [place] = await Location.reverseGeocodeAsync({
-        latitude,
-        longitude,
-      });
+    const [place] = await Location.reverseGeocodeAsync({
+      latitude,
+      longitude,
+    });
 
-      if (place.city || place.region) {
-        setLocationName(
-          `${place.city ?? ""}${place.region ? ", " + place.region : ""}`
-        );
-      } else {
-        setLocationName("Unknown Location");
-      }
+    if (place.city || place.region) {
+      setLocationName(
+        `${place.city ?? ""}${place.region ? ", " + place.region : ""}`
+      );
+    } else {
+      setLocationName("Unknown Location");
+    }
 
-      // Integrate the backend here for getting the heat index
-      const mockTemp = 52; // mock data for now
-      setTemperature(mockTemp);
-      setHeatLevel(getHeatIndexLevel(mockTemp));
-    })();
-  }, []);
+    try {
+      const response = await axios.post(
+        "http://192.168.1.12:8000/process_userlocation",
+        {
+          latitude: latitude,
+          longitude: longitude
+        }
+      );
+
+      const data = response.data;
+      setTemperature(data.heat_index);
+      setHeatLevel((getHeatIndexLevel(data.heat_index)));
+      console.log("Suggested shelters:", data.suggested_shelters);
+
+    } catch (error) {
+      console.error("Error fetching heat index:", error);
+    }
+  })();
+}, []);
 
   return (
     <View style={styles.container}>
