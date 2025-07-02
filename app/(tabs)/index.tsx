@@ -1,49 +1,11 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { getLocationName, getUserLocation } from "../../utils/getUserLocation";
-import { getHeatIndexLevel } from "../../utils/heatIndex";
+import { LocationContext } from "../../context/LocationContext";
 
 export default function App() {
-  const [temperature, setTemperature] = useState<number>(0);
-  const [locationName, setLocationName] = useState("Loading location...");
-  const [coords, setCoords] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [heatLevel, setHeatLevel] = useState<{
-    level: string;
-    color: string;
-  } | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const { latitude, longitude } = await getUserLocation();
-        setCoords({ latitude, longitude });
-
-        const resolvedName = await getLocationName(latitude, longitude);
-        setLocationName(resolvedName);
-
-        const response = await axios.post(
-          "http://192.168.1.12:8000/process_userlocation",
-          {
-            latitude,
-            longitude,
-          }
-        );
-
-        const data = response.data;
-        setTemperature(data.heat_index);
-        setHeatLevel(getHeatIndexLevel(data.heat_index));
-
-        console.log("Suggested shelters:", data.suggested_shelters);
-      } catch (error) {
-        console.error("Error fetching heat index or location:", error);
-        setLocationName("Location error");
-      }
-    })();
-  }, []);
+  // Get location from context/locationContext
+  const { coords, locationName, heatIndex, heatLevel, loading } =
+    useContext(LocationContext);
 
   return (
     <View style={styles.container}>
@@ -54,7 +16,9 @@ export default function App() {
         style={[styles.temperatureCard, { backgroundColor: heatLevel?.color }]}
       >
         <Text style={styles.emoji}>🌡️☀️</Text>
-        <Text style={styles.temperature}>{temperature}°C</Text>
+        <Text style={styles.temperature}>
+          {heatIndex !== null ? `${heatIndex}°C` : "Loading..."}
+        </Text>
       </View>
 
       <View style={styles.heatIndexBox}>

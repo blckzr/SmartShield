@@ -1,24 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet, View } from "react-native";
+import React, { useContext } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import MapView from "react-native-maps";
-import { getUserLocation } from "../../utils/getUserLocation";
+import { LocationContext } from "../../context/LocationContext";
 
 export default function HeatMap() {
-  const [coords, setCoords] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const { coords, loading } = useContext(LocationContext);
 
-  useEffect(() => {
-    getUserLocation()
-      .then((location) => setCoords(location))
-      .catch((error) => {
-        console.warn(error);
-        Alert.alert("Location Error", "Unable to retrieve your location.");
-      });
-  }, []);
-
-  if (!coords) {
+  if (loading || !coords) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#233D91" />
@@ -37,7 +25,7 @@ export default function HeatMap() {
           longitudeDelta: 0.01,
         }}
         showsUserLocation={true}
-      ></MapView>
+      />
     </View>
   );
 }
