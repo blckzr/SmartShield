@@ -13,11 +13,19 @@ type HeatLevel = {
   color: string;
 };
 
+type Shelter = {
+    name: string;
+    longitude: number;
+    latitude: number;
+    address: string;
+    };
+
 type LocationContextType = {
   coords: Coordinates | null;
   locationName: string;
   heatIndex: number | null;
   heatLevel: HeatLevel | null;
+  suggestedShelters: Shelter[];
   loading: boolean;
 };
 
@@ -26,6 +34,7 @@ export const LocationContext = createContext<LocationContextType>({
   locationName: "Loading...",
   heatIndex: null,
   heatLevel: null,
+  suggestedShelters: [],
   loading: true,
 });
 
@@ -35,6 +44,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [heatIndex, setHeatIndex] = useState<number | null>(null);
   const [heatLevel, setHeatLevel] = useState<HeatLevel | null>(null);
   const [loading, setLoading] = useState(true);
+  const [suggestedShelters, setSuggestedShelters] = useState<Shelter[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -72,6 +82,8 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
         const data = response.data;
         setHeatIndex(data.heat_index);
         setHeatLevel(getHeatIndexLevel(data.heat_index));
+        setSuggestedShelters(data.suggested_shelters);
+
       } catch (err) {
         console.error("Error in LocationContext:", err);
         setLocationName("Location error");
@@ -83,7 +95,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <LocationContext.Provider
-      value={{ coords, locationName, heatIndex, heatLevel, loading }}
+      value={{ coords, locationName, heatIndex, heatLevel, suggestedShelters, loading }}
     >
       {children}
     </LocationContext.Provider>

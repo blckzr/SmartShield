@@ -17,7 +17,7 @@ export default function App() {
       >
         <Text style={styles.emoji}>🌡️☀️</Text>
         <Text style={styles.temperature}>
-          {heatIndex !== null ? `${heatIndex}°C` : "Loading..."}
+          {heatIndex !== null ? `${heatIndex.toFixed(2)}°C` : "Loading..."}
         </Text>
       </View>
 
