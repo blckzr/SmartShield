@@ -1,67 +1,11 @@
-import axios from "axios";
-import * as Location from "expo-location";
-import React, { useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { getHeatIndexLevel } from "../../utils/heatIndex";
+import { LocationContext } from "../../context/LocationContext";
 
 export default function App() {
-  const [temperature, setTemperature] = useState<number>(0);
-  const [locationName, setLocationName] = useState<string>(
-    "Loading location..."
-  );
-  const [coords, setCoords] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [heatLevel, setHeatLevel] = useState<{
-    level: string;
-    color: string;
-  } | null>(null);
-
-  useEffect(() => {
-  (async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      setLocationName("Permission denied");
-      return;
-    }
-
-    const location = await Location.getCurrentPositionAsync({});
-    const { latitude, longitude } = location.coords;
-    setCoords({ latitude, longitude });
-
-    const [place] = await Location.reverseGeocodeAsync({
-      latitude,
-      longitude,
-    });
-
-    if (place.city || place.region) {
-      setLocationName(
-        `${place.city ?? ""}${place.region ? ", " + place.region : ""}`
-      );
-    } else {
-      setLocationName("Unknown Location");
-    }
-
-    try {
-      const response = await axios.post(
-        "http://192.168.1.12:8000/process_userlocation",
-        {
-          latitude: latitude,
-          longitude: longitude
-        }
-      );
-
-      const data = response.data;
-      setTemperature(data.heat_index);
-      setHeatLevel((getHeatIndexLevel(data.heat_index)));
-      console.log("Suggested shelters:", data.suggested_shelters);
-
-    } catch (error) {
-      console.error("Error fetching heat index:", error);
-    }
-  })();
-}, []);
+  // Get location from context/locationContext
+  const { coords, locationName, heatIndex, heatLevel, loading } =
+    useContext(LocationContext);
 
   return (
     <View style={styles.container}>
@@ -72,7 +16,9 @@ export default function App() {
         style={[styles.temperatureCard, { backgroundColor: heatLevel?.color }]}
       >
         <Text style={styles.emoji}>🌡️☀️</Text>
-        <Text style={styles.temperature}>{temperature}°C</Text>
+        <Text style={styles.temperature}>
+          {heatIndex !== null ? `${heatIndex.toFixed(2)}°C` : "Loading..."}
+        </Text>
       </View>
 
       <View style={styles.heatIndexBox}>
