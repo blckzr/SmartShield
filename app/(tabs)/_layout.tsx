@@ -1,6 +1,6 @@
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import Fontisto from "@expo/vector-icons/Fontisto";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Tabs } from "expo-router";
 import { useEffect, useState } from "react";
 import SplashScreen from "../../components/SplashScreen";
@@ -39,11 +39,11 @@ export default function RootLayout() {
         }}
       />
       <Tabs.Screen
-        name="shelterFinder"
+        name="safetyReminders"
         options={{
-          title: "NEAREST COOLING SHELTER",
+          title: "Safety Reminders",
           tabBarIcon: ({ color }) => (
-            <Fontisto name="map" size={24} color={color} />
+            <MaterialCommunityIcons name="newspaper-check" size={24} color={color} />
           ),
         }}
       />
