@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as Location from "expo-location";
 import React, { createContext, ReactNode, useEffect, useState } from "react";
-import { getHeatIndexLevel } from "../utils/heatIndex"; // adjust path as needed
+import { getHeatIndexLevel } from "../utils/heatIndex";
 
 type Coordinates = {
   latitude: number;
@@ -22,6 +22,7 @@ type Shelter = {
 
 type LocationContextType = {
   coords: Coordinates | null;
+  fixedStartCoords: Coordinates | null;
   locationName: string;
   heatIndex: number | null;
   heatLevel: HeatLevel | null;
@@ -31,11 +32,11 @@ type LocationContextType = {
   getDirectionsToShelter: (shelter: Shelter) => Promise<void>;
   resetRoute: () => void;
   loading: boolean;
-  startCoords: Coordinates | null;
 };
 
 export const LocationContext = createContext<LocationContextType>({
   coords: null,
+  fixedStartCoords: null,
   locationName: "Loading...",
   heatIndex: null,
   heatLevel: null,
@@ -45,18 +46,19 @@ export const LocationContext = createContext<LocationContextType>({
   getDirectionsToShelter: async () => {},
   resetRoute: () => {},
   loading: true,
-  startCoords: null,
 });
 
 export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [coords, setCoords] = useState<Coordinates | null>(null);
+  const [fixedStartCoords, setFixedStartCoords] = useState<Coordinates | null>(
+    null
+  );
   const [locationName, setLocationName] = useState("Loading...");
   const [heatIndex, setHeatIndex] = useState<number | null>(null);
   const [heatLevel, setHeatLevel] = useState<HeatLevel | null>(null);
   const [suggestedShelters, setSuggestedShelters] = useState<Shelter[]>([]);
   const [selectedShelter, setSelectedShelter] = useState<Shelter | null>(null);
   const [pathCoords, setPathCoords] = useState<Coordinates[]>([]);
-  const [startCoords, setStartCoords] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -109,7 +111,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setSelectedShelter(shelter);
-      setStartCoords(coords); // ✅ Lock the start point for routing
+      setFixedStartCoords(coords); // 🔒 Lock initial location
 
       const response = await axios.post(
         "http://192.168.100.24:8000/process_shelter_direction",
@@ -137,13 +139,14 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const resetRoute = () => {
     setSelectedShelter(null);
     setPathCoords([]);
-    setStartCoords(null);
+    setFixedStartCoords(null);
   };
 
   return (
     <LocationContext.Provider
       value={{
         coords,
+        fixedStartCoords,
         locationName,
         heatIndex,
         heatLevel,
@@ -153,7 +156,6 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
         getDirectionsToShelter,
         resetRoute,
         loading,
-        startCoords,
       }}
     >
       {children}

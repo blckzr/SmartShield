@@ -1,4 +1,5 @@
 import { FontAwesome5 } from "@expo/vector-icons";
+import { useRouter } from "expo-router"; // ✅ import useRouter
 import React, { useContext } from "react";
 import {
   ScrollView,
@@ -12,6 +13,13 @@ import { LocationContext } from "../../context/LocationContext";
 export default function ShelterFinder() {
   const { suggestedShelters, getDirectionsToShelter, loading } =
     useContext(LocationContext);
+
+  const router = useRouter();
+
+  const handleTrackRoute = async (shelter: any) => {
+    await getDirectionsToShelter(shelter);
+    router.push("/(tabs)/heatMap");
+  };
 
   return (
     <View style={styles.container}>
@@ -33,7 +41,7 @@ export default function ShelterFinder() {
 
                 <TouchableOpacity
                   style={styles.routeButton}
-                  onPress={() => getDirectionsToShelter(shelter)}
+                  onPress={() => handleTrackRoute(shelter)}
                 >
                   <FontAwesome5 name="location-arrow" size={14} color="white" />
                   <Text style={styles.routeText}>Track Route</Text>
