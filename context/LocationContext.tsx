@@ -14,11 +14,11 @@ type HeatLevel = {
 };
 
 type Shelter = {
-    name: string;
-    longitude: number;
-    latitude: number;
-    address: string;
-    };
+  name: string;
+  longitude: number;
+  latitude: number;
+  address: string;
+};
 
 type LocationContextType = {
   coords: Coordinates | null;
@@ -26,6 +26,10 @@ type LocationContextType = {
   heatIndex: number | null;
   heatLevel: HeatLevel | null;
   suggestedShelters: Shelter[];
+  selectedShelter: Shelter | null;
+  pathCoords: Coordinates[];
+  getDirectionsToShelter: (shelter: Shelter) => Promise<void>;
+  resetRoute: () => void;
   loading: boolean;
 };
 
@@ -35,6 +39,10 @@ export const LocationContext = createContext<LocationContextType>({
   heatIndex: null,
   heatLevel: null,
   suggestedShelters: [],
+  selectedShelter: null,
+  pathCoords: [],
+  getDirectionsToShelter: async () => {},
+  resetRoute: () => {},
   loading: true,
 });
 
@@ -43,8 +51,10 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [locationName, setLocationName] = useState("Loading...");
   const [heatIndex, setHeatIndex] = useState<number | null>(null);
   const [heatLevel, setHeatLevel] = useState<HeatLevel | null>(null);
-  const [loading, setLoading] = useState(true);
   const [suggestedShelters, setSuggestedShelters] = useState<Shelter[]>([]);
+  const [selectedShelter, setSelectedShelter] = useState<Shelter | null>(null);
+  const [pathCoords, setPathCoords] = useState<Coordinates[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -70,20 +80,15 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
             : "Unknown Location";
         setLocationName(name);
 
-        // 🔥 Request backend for heat index
         const response = await axios.post(
-          "http://192.168.1.12:8000/process_userlocation",
-          {
-            latitude,
-            longitude,
-          }
+          "http://192.168.100.24:8000/process_userlocation",
+          { latitude, longitude }
         );
 
         const data = response.data;
         setHeatIndex(data.heat_index);
         setHeatLevel(getHeatIndexLevel(data.heat_index));
         setSuggestedShelters(data.suggested_shelters);
-
       } catch (err) {
         console.error("Error in LocationContext:", err);
         setLocationName("Location error");
@@ -93,9 +98,54 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
     })();
   }, []);
 
+  const getDirectionsToShelter = async (shelter: Shelter) => {
+    if (!coords) return;
+
+    try {
+      setSelectedShelter(shelter);
+
+      const response = await axios.post(
+        "http://192.168.100.24:8000/process_shelter_direction",
+        {
+          startpoint: coords,
+          endpoint: {
+            latitude: shelter.latitude,
+            longitude: shelter.longitude,
+          },
+        }
+      );
+
+      const linestring = response.data.linestring_coordinates;
+      const converted = linestring.map(([lng, lat]: [number, number]) => ({
+        latitude: lat,
+        longitude: lng,
+      }));
+
+      setPathCoords(converted);
+    } catch (error) {
+      console.error("Failed to get shelter directions:", error);
+    }
+  };
+
+  const resetRoute = () => {
+    setSelectedShelter(null);
+    setPathCoords([]);
+  };
+
   return (
     <LocationContext.Provider
-      value={{ coords, locationName, heatIndex, heatLevel, suggestedShelters, loading }}
+      value={{
+        coords,
+        locationName,
+        heatIndex,
+        heatLevel,
+        suggestedShelters,
+        selectedShelter,
+        pathCoords,
+        getDirectionsToShelter,
+        resetRoute,
+        loading,
+      }}
     >
       {children}
     </LocationContext.Provider>
