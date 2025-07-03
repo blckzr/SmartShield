@@ -1,6 +1,6 @@
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useRouter } from "expo-router"; // ✅ import useRouter
-import React, { useContext } from "react";
+import { useRouter } from "expo-router";
+import React, { useContext, useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -11,15 +11,60 @@ import {
 import { LocationContext } from "../../context/LocationContext";
 
 export default function ShelterFinder() {
-  const { suggestedShelters, getDirectionsToShelter, loading } =
+  const { suggestedShelters, getDirectionsToShelter, loading, coords } =
     useContext(LocationContext);
+
+  const [shelterInfo, setShelterInfo] = useState<{
+    [index: number]: { distance: number; duration: number };
+  }>({});
 
   const router = useRouter();
 
-  const handleTrackRoute = async (shelter: any) => {
+  const handleTrackRoute = async (shelter: any, index: number) => {
     await getDirectionsToShelter(shelter);
     router.push("/(tabs)/heatMap");
   };
+
+  const fetchDistanceAndDuration = async (shelter: any, index: number) => {
+    if (!coords) return;
+
+    try {
+      const response = await fetch(
+        "http://192.168.100.24:8000/process_shelter_direction",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            startpoint: coords,
+            endpoint: {
+              latitude: shelter.latitude,
+              longitude: shelter.longitude,
+            },
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      setShelterInfo((prev) => ({
+        ...prev,
+        [index]: {
+          distance: data.distance_meters,
+          duration: data.duration_seconds,
+        },
+      }));
+    } catch (error) {
+      console.error("Failed to fetch distance/duration:", error);
+    }
+  };
+
+  useEffect(() => {
+    suggestedShelters.forEach((shelter, index) => {
+      fetchDistanceAndDuration(shelter, index);
+    });
+  }, [suggestedShelters]);
 
   return (
     <View style={styles.container}>
@@ -34,20 +79,38 @@ export default function ShelterFinder() {
               No shelters found nearby.
             </Text>
           ) : (
-            suggestedShelters.map((shelter, index) => (
-              <View key={index} style={styles.cardBlue}>
-                <Text style={styles.cardTitle}>{shelter.name}</Text>
-                <Text style={styles.subtext}>{shelter.address}</Text>
+            suggestedShelters.map((shelter, index) => {
+              const info = shelterInfo[index];
+              const distanceText = info
+                ? `${(info.distance / 1000).toFixed(2)} km`
+                : "Loading...";
+              const durationText = info
+                ? `${Math.round(info.duration / 60)} min`
+                : "Loading...";
 
-                <TouchableOpacity
-                  style={styles.routeButton}
-                  onPress={() => handleTrackRoute(shelter)}
-                >
-                  <FontAwesome5 name="location-arrow" size={14} color="white" />
-                  <Text style={styles.routeText}>Track Route</Text>
-                </TouchableOpacity>
-              </View>
-            ))
+              return (
+                <View key={index} style={styles.cardBlue}>
+                  <Text style={styles.cardTitle}>{shelter.name}</Text>
+                  <Text style={styles.subtext}>{shelter.address}</Text>
+                  <Text style={styles.subtext}>Distance: {distanceText}</Text>
+                  <Text style={styles.subtext}>
+                    Estimated Time: {durationText}
+                  </Text>
+
+                  <TouchableOpacity
+                    style={styles.routeButton}
+                    onPress={() => handleTrackRoute(shelter, index)}
+                  >
+                    <FontAwesome5
+                      name="location-arrow"
+                      size={14}
+                      color="white"
+                    />
+                    <Text style={styles.routeText}>Track Route</Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            })
           )}
         </ScrollView>
       )}
@@ -87,7 +150,7 @@ const styles = StyleSheet.create({
   subtext: {
     color: "white",
     fontSize: 14,
-    marginBottom: 12,
+    marginBottom: 4,
   },
   routeButton: {
     backgroundColor: "#2ecc71",
@@ -97,6 +160,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     gap: 8,
+    marginTop: 10,
   },
   routeText: {
     color: "white",

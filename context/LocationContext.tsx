@@ -20,6 +20,11 @@ type Shelter = {
   address: string;
 };
 
+type ShelterDirectionData = {
+  distance: number; // in meters
+  duration: number; // in seconds
+};
+
 type LocationContextType = {
   coords: Coordinates | null;
   fixedStartCoords: Coordinates | null;
@@ -32,6 +37,7 @@ type LocationContextType = {
   getDirectionsToShelter: (shelter: Shelter) => Promise<void>;
   resetRoute: () => void;
   loading: boolean;
+  shelterDirections: Record<string, ShelterDirectionData>; // ⬅️ added
 };
 
 export const LocationContext = createContext<LocationContextType>({
@@ -46,6 +52,7 @@ export const LocationContext = createContext<LocationContextType>({
   getDirectionsToShelter: async () => {},
   resetRoute: () => {},
   loading: true,
+  shelterDirections: {}, // ⬅️ added
 });
 
 export const LocationProvider = ({ children }: { children: ReactNode }) => {
@@ -59,6 +66,9 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [suggestedShelters, setSuggestedShelters] = useState<Shelter[]>([]);
   const [selectedShelter, setSelectedShelter] = useState<Shelter | null>(null);
   const [pathCoords, setPathCoords] = useState<Coordinates[]>([]);
+  const [shelterDirections, setShelterDirections] = useState<
+    Record<string, ShelterDirectionData>
+  >({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -111,7 +121,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setSelectedShelter(shelter);
-      setFixedStartCoords(coords); // 🔒 Lock initial location
+      setFixedStartCoords(coords);
 
       const response = await axios.post(
         "http://192.168.100.24:8000/process_shelter_direction",
@@ -131,6 +141,15 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
       }));
 
       setPathCoords(converted);
+
+      // ✅ Save direction data for this shelter
+      setShelterDirections((prev) => ({
+        ...prev,
+        [shelter.name]: {
+          distance: response.data.distance_meters,
+          duration: response.data.duration_seconds,
+        },
+      }));
     } catch (error) {
       console.error("Failed to get shelter directions:", error);
     }
@@ -140,6 +159,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
     setSelectedShelter(null);
     setPathCoords([]);
     setFixedStartCoords(null);
+    setShelterDirections({});
   };
 
   return (
@@ -156,6 +176,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
         getDirectionsToShelter,
         resetRoute,
         loading,
+        shelterDirections, // ✅ added
       }}
     >
       {children}
