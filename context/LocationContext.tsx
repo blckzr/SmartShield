@@ -31,6 +31,7 @@ type LocationContextType = {
   getDirectionsToShelter: (shelter: Shelter) => Promise<void>;
   resetRoute: () => void;
   loading: boolean;
+  startCoords: Coordinates | null;
 };
 
 export const LocationContext = createContext<LocationContextType>({
@@ -44,6 +45,7 @@ export const LocationContext = createContext<LocationContextType>({
   getDirectionsToShelter: async () => {},
   resetRoute: () => {},
   loading: true,
+  startCoords: null,
 });
 
 export const LocationProvider = ({ children }: { children: ReactNode }) => {
@@ -54,6 +56,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [suggestedShelters, setSuggestedShelters] = useState<Shelter[]>([]);
   const [selectedShelter, setSelectedShelter] = useState<Shelter | null>(null);
   const [pathCoords, setPathCoords] = useState<Coordinates[]>([]);
+  const [startCoords, setStartCoords] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -82,7 +85,10 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
 
         const response = await axios.post(
           "http://192.168.100.24:8000/process_userlocation",
-          { latitude, longitude }
+          {
+            latitude,
+            longitude,
+          }
         );
 
         const data = response.data;
@@ -103,6 +109,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setSelectedShelter(shelter);
+      setStartCoords(coords); // ✅ Lock the start point for routing
 
       const response = await axios.post(
         "http://192.168.100.24:8000/process_shelter_direction",
@@ -130,6 +137,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const resetRoute = () => {
     setSelectedShelter(null);
     setPathCoords([]);
+    setStartCoords(null);
   };
 
   return (
@@ -145,6 +153,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
         getDirectionsToShelter,
         resetRoute,
         loading,
+        startCoords,
       }}
     >
       {children}
