@@ -8,7 +8,7 @@ def searchpoi(lat, lon, API_KEY):
         "q" : q,
         "access_token" : API_KEY,
         "language" : "en",
-        "limit" : 5,
+        "limit" : 10,
         "proximity" : f"{lon},{lat}",
         "poi_category" : "shopping_mall"
     }
