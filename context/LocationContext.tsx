@@ -1,3 +1,4 @@
+import { BASE_URL } from "@/utils/config";
 import axios from "axios";
 import * as Location from "expo-location";
 import React, { createContext, ReactNode, useEffect, useState } from "react";
@@ -95,13 +96,10 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
             : "Unknown Location";
         setLocationName(name);
 
-        const response = await axios.post(
-          "http://192.168.100.24:8000/process_userlocation",
-          {
-            latitude,
-            longitude,
-          }
-        );
+        const response = await axios.post(`${BASE_URL}/process_userlocation`, {
+          latitude,
+          longitude,
+        });
 
         const data = response.data;
         setHeatIndex(data.heat_index);
@@ -124,7 +122,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
       setFixedStartCoords(coords);
 
       const response = await axios.post(
-        "http://192.168.100.24:8000/process_shelter_direction",
+        `${BASE_URL}/process_shelter_direction`,
         {
           startpoint: coords,
           endpoint: {

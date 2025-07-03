@@ -1,3 +1,4 @@
+import { BASE_URL } from "@/utils/config";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
@@ -29,22 +30,19 @@ export default function ShelterFinder() {
     if (!coords) return;
 
     try {
-      const response = await fetch(
-        "http://192.168.100.24:8000/process_shelter_direction",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      const response = await fetch(`${BASE_URL}/process_shelter_direction`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          startpoint: coords,
+          endpoint: {
+            latitude: shelter.latitude,
+            longitude: shelter.longitude,
           },
-          body: JSON.stringify({
-            startpoint: coords,
-            endpoint: {
-              latitude: shelter.latitude,
-              longitude: shelter.longitude,
-            },
-          }),
-        }
-      );
+        }),
+      });
 
       const data = await response.json();
 
