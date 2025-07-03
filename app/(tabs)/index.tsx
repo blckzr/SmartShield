@@ -7,10 +7,18 @@ export default function App() {
   const { coords, locationName, heatIndex, heatLevel, loading } =
     useContext(LocationContext);
 
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString("en-US", {
+    weekday: "short",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>{locationName}</Text>
-      <Text style={styles.date}>Fri, July 4, 2025</Text>
+      <Text style={styles.date}>{formattedDate}</Text>
 
       <View
         style={[styles.temperatureCard, { backgroundColor: heatLevel?.color }]}
