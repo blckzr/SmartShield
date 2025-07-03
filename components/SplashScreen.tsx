@@ -5,16 +5,10 @@ export default function SplashScreen() {
   return (
     <View style={styles.container}>
       <Image
-        source={require("../assets/images/1_SmartShield - LOGO.png")}
+        source={require("../assets/images/1_SmartShield - LOGO with title.png")}
         style={styles.logo}
         resizeMode="contain"
       />
-      {/* Title: SmartShield */}
-      <Text style={styles.title}>
-        <Text style={styles.titleRed}>Smart</Text>
-        <Text style={styles.titleBlue}>Shield</Text>
-        <Text style={styles.titleColon}>:</Text>
-      </Text>
 
       {/* Subtitle */}
       <Text style={styles.subtitle}>
